@@ -103,7 +103,7 @@ def get_abstracts_from_html(art_list_path, lang, raw_output_path, log_path):
         if pid in done_dict:
             continue
         
-        #if pid == "S0213-91112015000300008":
+        #if pid == "S0213-91112009000500005":
         #    stop = False
 
         
@@ -353,19 +353,54 @@ def create_documents(input_path, output_folder):
         #ofile.flush()
     
 
+def get_raw_sentences():
+    
+    clean_text_path = "/home/upf/corpora/SciELO_corpus/full_texts/clean_xml_text"
+    output_path = "/home/upf/corpora/SciELO_corpus/raw_scielo_sentences.txt"
+    
+    ofile = open(output_path, "w")
+    
+    MIN_LEN = 75
+    MAX_LEN = 300
+    for set_folder in sorted(os.listdir(clean_text_path)):
+        
+        set_path = os.path.join(clean_text_path, set_folder)
+        for filename in sorted(os.listdir(set_path)):
+            
+            file_path = os.path.join(set_path, filename)
+            
+            print file_path
+            xml_text = open(file_path).read()
+            soup = BeautifulSoup(xml_text, 'xml')
+            sentences = soup.find_all('sentence')
+            
+            for sent in sentences:
+                #sent = par.find_all('sentence')
+                if "Bibliografía" in sent.text.encode("utf-8"):
+                    break
+                
+                if len(sent.text) >= MIN_LEN and len(sent.text) <= MAX_LEN:
+                    print sent.text
+                    ofile.write(sent.text.strip().encode("utf-8") + "\n")
+                
+    
+    ofile.close()  
+
 if __name__ == '__main__':
     
     #create_article_list()
-    
+    get_raw_sentences()
+    sys.exit()
     art_list_path = os.path.join(CORPUS_PATH,"articles_list.txt")
     
-    lang = "es"
+    lang = "en"
     
     
-    raw_output_path = os.path.join(CORPUS_PATH,"raw_abstracts_%s.txt"%(lang.upper()))
-    log_path = os.path.join(CORPUS_PATH,"abstracts_labels_%s.log"%(lang.upper()))
-    get_abstracts_from_html(art_list_path, lang,raw_output_path, log_path)
-    
+    raw_output_path = os.path.join(CORPUS_PATH,"raw_abstracts_%s_f.txt"%(lang.upper()))
+    log_path = os.path.join(CORPUS_PATH,"abstracts_labels_%s_f.log"%(lang.upper()))
+    #get_abstracts_from_html(art_list_path, lang,raw_output_path, log_path)
     
     output_path = os.path.join(CORPUS_PATH,"abstracts_labels_%s.txt"%(lang.upper()))
+    
+    
             
